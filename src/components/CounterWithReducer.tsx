@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useCallback } from "react";
 import { useCounter } from "@/context/Counter";
 import Button from "./base/Button";
 import { Counter } from "./base/Counter";
@@ -7,17 +7,21 @@ import { Counter } from "./base/Counter";
 const CounterWithReducer = () => {
   const { state, dispatch } = useCounter();
 
+  const handleIncrement = useCallback(() => {
+    dispatch({ type: "increment" });
+  }, [dispatch]);
+
+  const handleDecrement = useCallback(() => {
+    dispatch({ type: "decrement" });
+  }, [dispatch]);
+
   return (
     <div>
-      <h2>Contador com useReducer e Context</h2>
+      <h2>Contador com useReducer</h2>
 
       <Counter counter={state.count} />
-      <Button onClick={() => dispatch({ type: "increment" })}>
-        Incrementar
-      </Button>
-      <Button onClick={() => dispatch({ type: "decrement" })}>
-        Decrementar
-      </Button>
+      <Button onClick={handleIncrement}>Incrementar</Button>
+      <Button onClick={handleDecrement}>Decrementar</Button>
     </div>
   );
 };
