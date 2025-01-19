@@ -3,14 +3,18 @@
 import React, { createContext, useContext, useReducer } from "react";
 
 // Estado inicial
-const initialState = { count: 0 };
+const initialState = { count1: 0, count2: 0 };
 
 function reducer(state: any, action: any) {
   switch (action.type) {
-    case "increment":
-      return { count: state.count + 1 };
-    case "decrement":
-      return { count: state.count - 1 };
+    case "increment1":
+      return { ...state, count1: state.count1 + 1 };
+    case "decrement1":
+      return { ...state, count1: state.count1 - 1 };
+    case "increment2":
+      return { ...state, count2: state.count2 + 1 };
+    case "decrement2":
+      return { ...state, count2: state.count2 - 1 };
     default:
       throw new Error();
   }
