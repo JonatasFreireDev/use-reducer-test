@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { createContext, useContext, useReducer, useState } from "react";
+import React, { createContext, useContext, useReducer } from "react";
 
 // Estado inicial
 const initialState = { count: 0 };
@@ -17,25 +17,26 @@ function reducer(state: any, action: any) {
 }
 
 // Criando o contexto
-export const CounterContext = createContext<any>();
+export const CounterWithReducerContext = createContext<any>();
 
 // Provedor do contexto
-export const CounterProvider = ({ children }) => {
+export const CounterWithReducerProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
-  const [count, setCount] = useState(0);
 
   return (
-    <CounterContext.Provider value={{ state, dispatch, count, setCount }}>
+    <CounterWithReducerContext.Provider value={{ state, dispatch }}>
       {children}
-    </CounterContext.Provider>
+    </CounterWithReducerContext.Provider>
   );
 };
 
-export const useCounter = () => {
-  const context = useContext(CounterContext);
+export const useCounterWithReducer = () => {
+  const context = useContext(CounterWithReducerContext);
 
   if (!context) {
-    throw new Error("useCounter deve ser usado dentro de um CounterProvider");
+    throw new Error(
+      "useCounter deve ser usado dentro de um CounterWithReducerProvider"
+    );
   }
 
   return context;
