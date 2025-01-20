@@ -5,8 +5,8 @@ interface CounterProps {
   counter?: number;
 }
 
-export const Counter = memo(({ counter }: CounterProps) => {
-  return <p>Valor: {counter}</p>;
-});
+export const Counter = memo(({ counter }: CounterProps) => (
+  <p>Valor: {counter}</p>
+));
 
 Counter.displayName = "Counter";
