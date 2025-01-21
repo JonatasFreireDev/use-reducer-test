@@ -1,42 +1,32 @@
 "use client";
 
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback } from "react";
 import {
   AddressItem as AddressItemProps,
-  EDIT_ADDRESS,
+  PREV_EDIT_MODE,
+  useAddress,
 } from "./context/AddressContext";
-import { AddressForm } from "./AddressForm";
 
-export const AddressItem = memo(({ id, city, street }: AddressItemProps) => {
-  const [isFormVisible, setIsFormVisible] = useState(false);
+export const AddressItem = memo((address: AddressItemProps) => {
+  const { dispatch } = useAddress();
 
-  const toggleFormVisibility = useCallback(() => {
-    setIsFormVisible((prev) => !prev);
-  }, []);
-
-  const handleSubmit = useCallback(
-    (dispatch, formData) => {
-      dispatch({ type: EDIT_ADDRESS, payload: { ...formData, id } });
-      toggleFormVisibility();
-    },
-    [id, toggleFormVisibility]
-  );
+  const handleChange = useCallback(() => {
+    dispatch({ type: PREV_EDIT_MODE, payload: address });
+  }, [dispatch, address]);
 
   return (
     <li>
       <div className="flex items-center justify-between p-2 hover:bg-slate-800">
         <div className="address-details">
-          {street}, {city}
+          {address.street}, {address.city}
         </div>
         <button
-          onClick={toggleFormVisibility}
+          onClick={handleChange}
           className="bg-slate-500 p-2 rounded-md mx-3 "
         >
           Edit
         </button>
       </div>
-
-      {isFormVisible && <AddressForm handleSubmit={handleSubmit} />}
     </li>
   );
 });

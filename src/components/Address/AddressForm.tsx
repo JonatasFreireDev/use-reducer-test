@@ -1,14 +1,24 @@
 "use client";
-import { Dispatch, memo, useCallback, useState } from "react";
-import { useAddress } from "./context/AddressContext";
+import { memo, useCallback, useEffect, useState } from "react";
+import {
+  ADD_ADDRESS,
+  CANCEL_EDIT_MODE,
+  EDIT_ADDRESS,
+  useAddress,
+} from "./context/AddressContext";
 
-interface AddressForm {
-  handleSubmit: (dispatch: Dispatch<string>, formData: object) => void;
-}
-
-export const AddressForm = memo(({ handleSubmit }: AddressForm) => {
-  const { dispatch } = useAddress();
+export const AddressForm = memo(() => {
+  const { state, dispatch } = useAddress();
   const [formData, setFormData] = useState({ id: "", street: "", city: "" });
+  const {
+    config: { selectedAddress },
+  } = state;
+
+  useEffect(() => {
+    if (!selectedAddress) return;
+
+    setFormData({ ...selectedAddress });
+  }, [selectedAddress]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -20,13 +30,32 @@ export const AddressForm = memo(({ handleSubmit }: AddressForm) => {
     [formData]
   );
 
+  const handleCancelEdit = useCallback(() => {
+    dispatch({
+      type: CANCEL_EDIT_MODE,
+    });
+    setFormData({ id: "", street: "", city: "" });
+  }, [dispatch]);
+
   const handleSubmitModify = useCallback(
     (e: React.ChangeEvent<HTMLFormElement>) => {
       e.preventDefault();
-      handleSubmit(dispatch, formData);
+
+      if (selectedAddress) {
+        dispatch({
+          type: EDIT_ADDRESS,
+          payload: formData,
+        });
+      } else {
+        dispatch({
+          type: ADD_ADDRESS,
+          payload: { ...formData, id: Date.now().toString() },
+        });
+      }
+
       setFormData({ id: "", street: "", city: "" });
     },
-    [dispatch, formData, handleSubmit]
+    [dispatch, formData, selectedAddress]
   );
 
   return (
@@ -53,8 +82,17 @@ export const AddressForm = memo(({ handleSubmit }: AddressForm) => {
               onChange={handleChange}
             />
           </label>
+          {selectedAddress && (
+            <button
+              type="button"
+              onClick={handleCancelEdit}
+              className="bg-slate-500 p-2 rounded-md"
+            >
+              cancel
+            </button>
+          )}
           <button type="submit" className="bg-slate-500 p-2 rounded-md">
-            Add
+            {selectedAddress ? "Update" : "Add"}
           </button>
         </div>
       </div>

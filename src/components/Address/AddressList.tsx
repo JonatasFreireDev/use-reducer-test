@@ -7,7 +7,7 @@ export const AddressList = () => {
 
   return (
     <ul>
-      {state.map((address) => (
+      {state.addressList.map((address, index) => (
         <AddressItem key={address.id} {...address} />
       ))}
     </ul>
