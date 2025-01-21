@@ -1,25 +1,40 @@
 "use client";
-import React, { useReducer } from "react";
+import React, { Dispatch, SetStateAction, useContext, useReducer } from "react";
+
+export interface AddressItem {
+  id: string;
+  street: string;
+  city: string;
+}
+
+export interface AddressContextProps {
+  state: AddressItem[];
+  dispatch: Dispatch<SetStateAction<AddressItem>>;
+}
 
 // Ações do reducer
 export const ADD_ADDRESS = "ADD_ADDRESS";
 export const EDIT_ADDRESS = "EDIT_ADDRESS";
 
 // Criar o contexto
-export const AddressContext = React.createContext();
+export const AddressContext = React.createContext<AddressContextProps>(
+  {} as AddressContextProps
+);
 
 // Função reducer
 const addressReducer = (
-  state: any[],
-  action: { type: any; payload: { id: any } }
+  state: AddressItem[],
+  action: { type: string; payload: { id: string } }
 ) => {
   console.log(action);
   switch (action.type) {
     case ADD_ADDRESS:
       return [...state, action.payload];
     case EDIT_ADDRESS:
-      return state.map((address: { id: any }) =>
-        address.id === action.payload.id ? action.payload : address
+      return state.map((address) =>
+        address.id === action.payload.id
+          ? { ...address, ...action.payload }
+          : address
       );
     default:
       return state;
@@ -35,4 +50,13 @@ export const AddressProvider = ({ children }) => {
       {children}
     </AddressContext.Provider>
   );
+};
+
+export const useAddress = () => {
+  const context = useContext(AddressContext);
+
+  if (!context)
+    throw new Error("useAddress deve ser usado dentro de um AddressProvider");
+
+  return context;
 };

@@ -5,19 +5,20 @@ import {
   ADD_ADDRESS,
   AddressProvider,
 } from "@/components/Address/context/AddressContext";
+import { useCallback } from "react";
 
 export default function Home() {
-  const handleSubimit = (dispatch, formData) => {
+  const handleSubmit = useCallback((dispatch, formData) => {
     dispatch({
       type: ADD_ADDRESS,
       payload: { ...formData, id: Date.now().toString() },
     });
-  };
+  }, []);
 
   return (
     <AddressProvider>
       <h1>Address Manager</h1>
-      <AddressForm handleSubimit={handleSubimit} />
+      <AddressForm handleSubmit={handleSubmit} />
       <AddressList />
     </AddressProvider>
   );
