@@ -1,7 +1,8 @@
-import React from "react";
+"use client";
+import React, { memo } from "react";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const Button = ({ children, onClick }: any) => {
+const Button = memo(({ children, onClick }: any) => {
   return (
     <button
       onClick={onClick}
@@ -10,6 +11,8 @@ const Button = ({ children, onClick }: any) => {
       {children}
     </button>
   );
-};
+});
+
+Button.displayName = "Button";
 
 export default Button;
