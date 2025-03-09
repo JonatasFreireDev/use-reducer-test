@@ -1,91 +1,97 @@
 "use client";
-import { memo, useCallback, useEffect, useState } from "react";
-import {
-  ADD_ADDRESS,
-  CANCEL_EDIT_MODE,
-  EDIT_ADDRESS,
-  useAddress,
-} from "./context/AddressContext";
+import { memo, useCallback, useEffect, useRef } from "react";
+import { debounce } from "lodash";
+import { useAddressOperations } from "./store/hooks";
+import { useAddressSelector } from "./store/context";
 
 export const AddressForm = memo(() => {
-  const { state, dispatch } = useAddress();
-  const [formData, setFormData] = useState({ id: "", street: "", city: "" });
-  const {
-    config: { selectedAddress },
-  } = state;
+  const { addAddress, editAddress, cancelEditMode } = useAddressOperations();
+  const selectedAddress = useAddressSelector(
+    (state) => state.config.selectedAddress
+  );
+  const formRef = useRef({ id: "", street: "", city: "" });
+  const streetRef = useRef<HTMLInputElement>(null);
+  const cityRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!selectedAddress) return;
+    if (!selectedAddress) {
+      formRef.current = { id: "", street: "", city: "" };
+      return;
+    }
 
-    setFormData({ ...selectedAddress });
+    formRef.current = { ...selectedAddress };
+    if (streetRef.current) streetRef.current.value = selectedAddress.street;
+    if (cityRef.current) cityRef.current.value = selectedAddress.city;
   }, [selectedAddress]);
 
-  const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setFormData({
-        ...formData,
-        [e.target.name]: e.target.value,
-      });
-    },
-    [formData]
+  const debouncedUpdate = useCallback(
+    debounce((name: string, value: string) => {
+      formRef.current = {
+        ...formRef.current,
+        [name]: value,
+      };
+    }, 300),
+    []
   );
 
-  const handleCancelEdit = useCallback(() => {
-    dispatch({
-      type: CANCEL_EDIT_MODE,
-    });
-    setFormData({ id: "", street: "", city: "" });
-  }, [dispatch]);
+  const handleChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedUpdate(e.target.name, e.target.value);
+  }, []);
 
-  const handleSubmitModify = useCallback(
-    (e: React.ChangeEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
 
       if (selectedAddress) {
-        dispatch({
-          type: EDIT_ADDRESS,
-          payload: formData,
-        });
+        editAddress({ ...formRef.current, id: selectedAddress.id });
       } else {
-        dispatch({
-          type: ADD_ADDRESS,
-          payload: { ...formData, id: Date.now().toString() },
-        });
+        addAddress({ ...formRef.current, id: Date.now().toString() });
       }
 
-      setFormData({ id: "", street: "", city: "" });
+      formRef.current = { id: "", street: "", city: "" };
+      if (streetRef.current) streetRef.current.value = "";
+      if (cityRef.current) cityRef.current.value = "";
     },
-    [dispatch, formData, selectedAddress]
+    [selectedAddress, addAddress, editAddress]
   );
 
+  const handleCancel = useCallback(() => {
+    cancelEditMode();
+    formRef.current = { id: "", street: "", city: "" };
+    if (streetRef.current) streetRef.current.value = "";
+    if (cityRef.current) cityRef.current.value = "";
+  }, [cancelEditMode]);
+
   return (
-    <form onSubmit={handleSubmitModify}>
+    <form onSubmit={handleSubmit}>
       <div className="flex p-5">
         <div className="grid gap-1 justify-items-end">
           <label>
             Rua:
             <input
+              ref={streetRef}
               type="text"
               name="street"
               placeholder="Street"
-              value={formData.street}
+              defaultValue={selectedAddress?.street || ""}
               onChange={handleChange}
             />
           </label>
           <label>
             Cidade:
             <input
+              ref={cityRef}
               type="text"
               name="city"
               placeholder="City"
-              value={formData.city}
+              defaultValue={selectedAddress?.city || ""}
               onChange={handleChange}
             />
           </label>
           {selectedAddress && (
             <button
               type="button"
-              onClick={handleCancelEdit}
+              onClick={handleCancel}
               className="bg-slate-500 p-2 rounded-md"
             >
               cancel

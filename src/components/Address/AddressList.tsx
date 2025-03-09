@@ -1,15 +1,26 @@
 "use client";
-import { useAddress } from "./context/AddressContext";
+import { memo, useCallback } from "react";
+import { AddressItem as AddressItemProps } from "./store/types";
+import { useAddressSelector } from "./store/context";
 import { AddressItem } from "./AddressItem";
 
-export const AddressList = () => {
-  const { state } = useAddress();
+export const AddressList = memo(() => {
+  const addressList = useAddressSelector((state) => state.addressList);
 
-  return (
-    <ul>
-      {state.addressList.map((address, index) => (
-        <AddressItem key={address.id} {...address} />
-      ))}
-    </ul>
+  // Memoize the render item callback
+  const renderItem = useCallback(
+    (address: AddressItemProps) => (
+      <AddressItem
+        key={address.id}
+        id={address.id}
+        street={address.street}
+        city={address.city}
+      />
+    ),
+    []
   );
-};
+
+  return <ul>{(addressList as AddressItemProps[]).map(renderItem)}</ul>;
+});
+
+AddressList.displayName = "AddressList";
